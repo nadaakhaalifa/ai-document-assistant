@@ -1,11 +1,25 @@
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, HTTPException
 from PyPDF2 import PdfReader
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
+from openai import OpenAI
+from dotenv import load_dotenv
+from pydantic import BaseModel
+import os
+
+# go read file .env now so the API become available to the code 
+load_dotenv()
+
+# gets the key from .env , creates a connection to openAI, client => what i use to ask AI Q[PHONE TO CALL OPENAI]
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 app = FastAPI()
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
 stored_chunks = []
+
+class QuestionRequest(BaseModel):
+    question: str
 
 @app.get("/")
 def home():
@@ -37,6 +51,30 @@ def get_best_chunk(question, chunks):
     # get the index of highest score and return it 
     best_index = scores.argmax()
     return chunks [best_index]
+# asks OpenAI {send text to AI }
+def ask_llm(question, context):
+    # be helpful, don't use outside knowledge[only pdf content], if u don't know just say idk
+    prompt= prompt = f"""
+You are a helpful assistant.
+Answer the question only using the context below.
+If the answer is not in the context, say: "I could not find that in the document."
+
+
+Context:
+{context}
+
+Question:
+{question}
+"""
+    # asks OpenAI for an answer
+    response = client.responses.create(
+        model="gpt-4.1-mini",
+        input=prompt
+    )
+    # gives us the final answer text
+    return response.output_text
+
+
 
 # upload endpoint
 @app.post("/upload")
@@ -67,16 +105,15 @@ async def upload_file(file: UploadFile = File(...)):
     }
 
 # Question endpoint
-@app.get("/ask")
-def ask_question(question: str):
-    global stored_chunks
-    
+@app.post("/ask")
+def ask_question(data: QuestionRequest):    
     if not stored_chunks:
-       return {"error": "No document uploaded yet"}
+       raise HTTPException(status_code=400, detail="Please upload a PDF first")
    
-    best_chunk = get_best_chunk(question, stored_chunks)
-    
+    best_chunk = get_best_chunk(data.question, stored_chunks)
+    answer = ask_llm(data.question, best_chunk)
     return {
-        "question": question,
-        "best_chunk": best_chunk
+        "question": data.question,
+        "best_chunk": best_chunk,
+        "answer": answer
     }
