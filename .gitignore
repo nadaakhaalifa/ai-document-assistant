@@ -1,0 +1,9 @@
+
+ai-venv/
+__pycache__/
+*.pyc
+.DS_Store
+temp.pdf
+temp.zip
+temp_folder/
+.env
