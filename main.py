@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 app = FastAPI()
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+stored_chunks = []
 
 @app.get("/")
 def home():
@@ -55,23 +56,26 @@ async def upload_file(file: UploadFile = File(...)):
         page_text = page.extract_text()
         if page_text:
            text += page_text
-    chunks = split_text(text)
+           
+    global stored_chunks
+    stored_chunks = split_text(text)
+    
     return {
         "filename" : file.filename,
-        "num_chunks": len(chunks),
-        "first_chunk": chunks[0] if chunks else ""
+        "num_chunks": len(stored_chunks),
+        "first_chunk": stored_chunks[0] if stored_chunks else ""
     }
 
 # Question endpoint
 @app.get("/ask")
 def ask_question(question: str):
-    # fake data => Test the retrieval logic ONLY
-    sample_chunks=[
-        "Machine learning is a field of artificial intelligence.",
-        "FastAPI is a Python framework for building APIs.",
-        "RAG combines retrieval with generation."
-    ]
-    best_chunk = get_best_chunk(question, sample_chunks)
+    global stored_chunks
+    
+    if not stored_chunks:
+       return {"error": "No document uploaded yet"}
+   
+    best_chunk = get_best_chunk(question, stored_chunks)
+    
     return {
         "question": question,
         "best_chunk": best_chunk
