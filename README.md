@@ -2,6 +2,7 @@
 ![App Demo](demo.png)
 An AI-powered document assistant built with FastAPI and OpenAI that uses Retrieval-Augmented Generation (RAG) to answer questions from uploaded PDFs.
 
+
 ## Features
 - Upload PDF documents
 - Intelligent chunking & embedding
@@ -60,7 +61,6 @@ OPENAI_API_KEY=your_api_key_here
 uvicorn main:app --reload
 ```
 ## Run frontend (Streamlit)
-
 Open a new terminal and run:
 
 ```bash
