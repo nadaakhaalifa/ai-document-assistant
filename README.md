@@ -18,11 +18,18 @@ An AI-powered document assistant built with FastAPI and OpenAI that uses Retriev
 6. LLM generates answer using context
 
 ## Tech Stack
-
 - Python  
-- FastAPI  
-- Sentence Transformers  
-- OpenAI API  
+- FastAPI (Backend API)  
+- Streamlit (Frontend UI)  
+- Sentence Transformers (Embeddings)  
+- OpenAI API (LLM)  
+
+## Frontend
+A simple Streamlit interface is provided to interact with the backend.
+- Upload PDF files  
+- Ask questions  
+- View AI-generated answers  
+
 
 ## API Endpoints
 
@@ -52,6 +59,14 @@ OPENAI_API_KEY=your_api_key_here
 ```bash
 uvicorn main:app --reload
 ```
+## Run frontend (Streamlit)
+
+Open a new terminal and run:
+
+```bash
+streamlit run streamlit_app.py
+```
+
 
 ## Open docs
 http://127.0.0.1:8000/docs
