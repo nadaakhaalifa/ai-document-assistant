@@ -15,15 +15,15 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
 # embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-embedding_model = None
+# embedding_model = None
 stored_chunks = []
 
-def get_model():
-    global embedding_model
-    if embedding_model is None:
-        from sentence_transformers import SentenceTransformer
-        embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
-    return embedding_model
+# def get_model():
+#     global embedding_model
+#     if embedding_model is None:
+#         from sentence_transformers import SentenceTransformer
+#         embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+#     return embedding_model
 
 class QuestionRequest(BaseModel):
     question: str
@@ -46,23 +46,25 @@ def split_text(text, chunk_size=500):
 # retrieval function
 def get_top_chunks(question, chunks, k=3):
     if not chunks:
-        return[]
-    
-    # convert all chunks and the question into vectors
-    chunk_embeddings = get_model().encode(chunks)
-    question_embeddings = get_model().encode([question])
-    
-    # compare the question with all chunks {highest score means the most relevant chunk}
-    similarities = cosine_similarity (question_embeddings, chunk_embeddings)[0]
-    
-     
-    # get top k indices
-    top_indices = similarities.argsort()[-k:][::-1]
-    return [chunks[i] for i in top_indices]
+        return []
 
+    question_words = question.lower().split()
+
+    scored_chunks = []
+    for chunk in chunks:
+        score = sum(word in chunk.lower() for word in question_words)
+        scored_chunks.append((score, chunk))
+
+    scored_chunks.sort(key=lambda x: x[0], reverse=True)
+    return [chunk for score, chunk in scored_chunks[:k]]
+
+# def get_top_chunks(question, chunks, k=3):
+#     if not chunks:
+#         return []
+#     return chunks[:k]
 
 # asks OpenAI {send text to AI }
-def ask_llm(question, context):
+def ask_llm(question: str, context: str):
     # be helpful, don't use outside knowledge[only pdf content], if u don't know just say idk
     prompt= f"""
 You are a helpful assistant.
@@ -89,30 +91,38 @@ Question:
 # upload endpoint
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
-    content= await file.read()
-    
+    global stored_chunks
+
     if file.content_type != "application/pdf":
         return {"error" : "Only PDF supported"}
+    content= await file.read()
     
+    temp_file_path = "temp.pdf"
     with open("temp.pdf","wb") as f:
         f.write(content)
         
-    reader = PdfReader("temp.pdf")
-    text=""
-    
-    for page in reader.pages:
-        page_text = page.extract_text()
-        if page_text:
-           text += page_text
-           
-    global stored_chunks
-    stored_chunks = split_text(text)
-    
-    return {
-        "filename" : file.filename,
-        "num_chunks": len(stored_chunks),
-        "first_chunk": stored_chunks[0] if stored_chunks else ""
-    }
+    try:
+        reader = PdfReader(temp_file_path)
+        text = ""
+
+        for page in reader.pages:
+            page_text = page.extract_text()
+            if page_text:
+                text += page_text
+
+        if not text.strip():
+            raise HTTPException(status_code=400, detail="Could not extract text from PDF")
+
+        stored_chunks = split_text(text)
+
+        return {
+            "filename": file.filename,
+            "num_chunks": len(stored_chunks),
+            "first_chunk": stored_chunks[0] if stored_chunks else ""
+        }
+    finally:
+        if os.path.exists(temp_file_path):
+            os.remove(temp_file_path)
 
 # Question endpoint
 @app.post("/ask")
@@ -120,11 +130,15 @@ def ask_question(data: QuestionRequest):
     if not stored_chunks:
        raise HTTPException(status_code=400, detail="Please upload a PDF first")
    
-    top_chunks = get_top_chunks(data.question, stored_chunks)
-    context = "\n".join(top_chunks)
+    try:
+        top_chunks = get_top_chunks(data.question, stored_chunks)
+        context = "\n".join(top_chunks)
 
-    answer = ask_llm(data.question, context)
-    return {
+        answer = ask_llm(data.question, context)
+        return {
         "question": data.question,
         "answer": answer
-    }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error while answering question: {str(e)}")
+    
