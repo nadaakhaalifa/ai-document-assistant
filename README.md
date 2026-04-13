@@ -85,3 +85,6 @@ Data is stored in memory (not persistent yet)
 .env is not included for security reasons
 
 
+## Demo
+
+![App Demo](demo.png)
