@@ -15,8 +15,15 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+# embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+embedding_model = None
 stored_chunks = []
+
+def get_model():
+    global embedding_model
+    if embedding_model is None:
+        embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+    return embedding_model
 
 class QuestionRequest(BaseModel):
     question: str
@@ -42,8 +49,8 @@ def get_top_chunks(question, chunks, k=3):
         return[]
     
     # convert all chunks and the question into vectors
-    chunk_embeddings = embedding_model.encode(chunks)
-    question_embeddings = embedding_model.encode([question])
+    chunk_embeddings = get_model().encode(chunks)
+    question_embeddings = get_model().encode([question])
     
     # compare the question with all chunks {highest score means the most relevant chunk}
     similarities = cosine_similarity (question_embeddings, chunk_embeddings)[0]

@@ -38,3 +38,5 @@ if st.button("Ask"):
                 st.write(answer)
             else:
                 st.error("Failed to get answer. Make sure you uploaded a PDF first.")
+                
+                
