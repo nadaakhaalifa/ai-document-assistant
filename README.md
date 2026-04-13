@@ -1,5 +1,5 @@
 # AI Document Assistant
-
+![App Demo](demo.png)
 An AI-powered document assistant built with FastAPI and OpenAI that uses Retrieval-Augmented Generation (RAG) to answer questions from uploaded PDFs.
 
 ## Features
@@ -83,8 +83,3 @@ http://127.0.0.1:8000/docs
 This is a basic RAG implementation
 Data is stored in memory (not persistent yet)
 .env is not included for security reasons
-
-
-## Demo
-
-![App Demo](demo.png)
