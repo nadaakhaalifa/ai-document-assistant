@@ -85,5 +85,10 @@ http://127.0.0.1:8000/docs
 
 ## Notes
 This is a basic RAG implementation
+
 Data is stored in memory (not persistent yet)
+
 .env is not included for security reasons
+
+## Notes
+- First request may be slow due to Render free tier (cold start)
