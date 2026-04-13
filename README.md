@@ -1,17 +1,21 @@
 # AI Document Assistant
 
-This project is a simple AI-powered document assistant built using FastAPI, embeddings, and OpenAI.
+An AI-powered document assistant built with FastAPI and OpenAI that uses Retrieval-Augmented Generation (RAG) to answer questions from uploaded PDFs.
 
-The idea is to upload a PDF, find the most relevant part of the document using embeddings, and then use an LLM to generate an answer based on that context.
+## Features
+- Upload PDF documents
+- Intelligent chunking & embedding
+- Semantic search using cosine similarity
+- LLM-powered answer generation
+- Clean and simple API
 
-## How it works
-
-1. Upload a PDF file  
-2. Extract and split text into chunks  
-3. Convert chunks into embeddings  
-4. Compare the question with chunks using cosine similarity  
-5. Retrieve the most relevant chunk  
-6. Send it to OpenAI to generate the final answer  
+## Architecture
+1. PDF → text extraction
+2. Text → chunks
+3. Chunks → embeddings
+4. Question → embedding
+5. Similarity search (top-k)
+6. LLM generates answer using context
 
 ## Tech Stack
 
@@ -19,6 +23,14 @@ The idea is to upload a PDF, find the most relevant part of the document using e
 - FastAPI  
 - Sentence Transformers  
 - OpenAI API  
+
+## API Endpoints
+
+### Upload PDF
+POST /upload
+
+### Ask Question
+POST /ask
 
 ## How to run
 
@@ -30,9 +42,11 @@ source ai-venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## environment file 
-create `.env` 
+## Environment
+Create a `.env` file:
+```env
 OPENAI_API_KEY=your_api_key_here
+```
 
 ## Run server 
 ```bash
@@ -43,10 +57,12 @@ uvicorn main:app --reload
 http://127.0.0.1:8000/docs
 
 ## Example request
-json:
+
+```json
 {
   "question": "What is this document about?"
 }
+```
 
 ## Notes
 This is a basic RAG implementation
