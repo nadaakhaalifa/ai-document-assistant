@@ -37,24 +37,27 @@ def split_text(text, chunk_size=500):
 
 
 # retrieval function
-def get_best_chunk(question, chunks):
+def get_top_chunks(question, chunks, k=3):
     if not chunks:
-        return""
+        return[]
     
     # convert all chunks and the question into vectors
     chunk_embeddings = embedding_model.encode(chunks)
     question_embeddings = embedding_model.encode([question])
     
     # compare the question with all chunks {highest score means the most relevant chunk}
-    scores = cosine_similarity (question_embeddings, chunk_embeddings)[0]
+    similarities = cosine_similarity (question_embeddings, chunk_embeddings)[0]
     
-    # get the index of highest score and return it 
-    best_index = scores.argmax()
-    return chunks [best_index]
+     
+    # get top k indices
+    top_indices = similarities.argsort()[-k:][::-1]
+    return [chunks[i] for i in top_indices]
+
+
 # asks OpenAI {send text to AI }
 def ask_llm(question, context):
     # be helpful, don't use outside knowledge[only pdf content], if u don't know just say idk
-    prompt= prompt = f"""
+    prompt= f"""
 You are a helpful assistant.
 Answer the question only using the context below.
 If the answer is not in the context, say: "I could not find that in the document."
@@ -110,10 +113,11 @@ def ask_question(data: QuestionRequest):
     if not stored_chunks:
        raise HTTPException(status_code=400, detail="Please upload a PDF first")
    
-    best_chunk = get_best_chunk(data.question, stored_chunks)
-    answer = ask_llm(data.question, best_chunk)
+    top_chunks = get_top_chunks(data.question, stored_chunks)
+    context = "\n".join(top_chunks)
+
+    answer = ask_llm(data.question, context)
     return {
         "question": data.question,
-        "best_chunk": best_chunk,
         "answer": answer
     }
