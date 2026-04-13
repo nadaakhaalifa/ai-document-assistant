@@ -1,6 +1,5 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from PyPDF2 import PdfReader
-from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from openai import OpenAI
@@ -22,6 +21,7 @@ stored_chunks = []
 def get_model():
     global embedding_model
     if embedding_model is None:
+        from sentence_transformers import SentenceTransformer
         embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
     return embedding_model
 
