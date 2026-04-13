@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 from pydantic import BaseModel
 import os
 
-# go read file .env now so the API become available to the code
+# Go read file .env now so the API become available to the code
 load_dotenv()
 
 # gets the key from .env , creates a connection to openAI, client => what i use to ask AI Q[PHONE TO CALL OPENAI]
