@@ -2,6 +2,10 @@
 ![App Demo](demo.png)
 An AI-powered document assistant built with FastAPI and OpenAI that uses Retrieval-Augmented Generation (RAG) to answer questions from uploaded PDFs.
 
+# AI Document Assistant
+
+Try the app here:
+https://ai-document-assistant-1-lvec.onrender.com
 
 ## Features
 - Upload PDF documents
