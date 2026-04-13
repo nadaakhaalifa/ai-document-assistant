@@ -4,7 +4,7 @@ import os
 
 st.set_page_config(page_title="AI Document Assistant", page_icon="📄", layout="centered")
 
-API_URL = os.getenv("API_URL", "https://ai-document-assistant-nv3p.onrender.com")
+API_URL = os.getenv("API_URL", "https://fastapi-backend-ekgg.onrender.com")
 
 st.title("AI Document Assistant")
 st.write("Upload a PDF and ask questions about its content.")
