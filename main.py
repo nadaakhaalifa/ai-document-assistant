@@ -52,6 +52,10 @@ def get_embedding(text: str):
 
 
 def build_faiss_index(chunks):
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=chunks
+    )
     embeddings = [get_embedding(chunk) for chunk in chunks]
     embeddings = np.array(embeddings, dtype="float32")
 
