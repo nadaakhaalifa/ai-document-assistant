@@ -57,12 +57,17 @@ def build_faiss_index(chunks):
 
     for attempt in range(max_retries):
         try:
-            response = client.embeddings.create(
-                model="text-embedding-3-small",
-                input=chunks
-            )
+            embeddings = []
 
-            embeddings = [item.embedding for item in response.data]
+            for chunk in chunks:
+                res = client.embeddings.create(
+                    model="text-embedding-3-small",
+                    input=chunk
+                )
+                
+                embeddings.append(res.data[0].embedding)
+                time.sleep(0.5)
+
             embeddings = np.array(embeddings, dtype="float32")
 
             faiss.normalize_L2(embeddings)
@@ -70,6 +75,7 @@ def build_faiss_index(chunks):
             dimension = embeddings.shape[1]
             index = faiss.IndexFlatIP(dimension)
             index.add(embeddings)
+
             return index
 
         except Exception as e:
@@ -134,6 +140,9 @@ Question:
 # upload endpoint
 @app.post("/upload")
 async def upload_file(file: UploadFile = File(...)):
+    print("UPLOAD ROUTE HIT 🚀")
+    print(f"Client tried upload: {file.filename}")
+    
     global stored_chunks, faiss_index
 
     if file.content_type != "application/pdf":
@@ -157,7 +166,7 @@ async def upload_file(file: UploadFile = File(...)):
         if not text.strip():
             raise HTTPException(status_code=400, detail="Could not extract text from PDF")
 
-        stored_chunks = split_text(text, chunk_size=1500, overlap=200)[:20]
+        stored_chunks = split_text(text, chunk_size=1500, overlap=200)[:5]
         faiss_index = build_faiss_index(stored_chunks)
 
         return {

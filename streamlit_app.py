@@ -24,6 +24,8 @@ if "uploaded_file_hash" not in st.session_state:
 if "pdf_uploaded" not in st.session_state:
     st.session_state.pdf_uploaded = False
 
+if "last_uploaded_filename" not in st.session_state:
+    st.session_state.last_uploaded_filename = None
 
 # FILE UPLOADER
 uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
@@ -33,6 +35,8 @@ uploaded_file = st.file_uploader("Upload a PDF file", type=["pdf"])
 if uploaded_file is None:
     st.session_state.pdf_uploaded = False
     st.session_state.uploaded_file_hash = None
+    st.session_state.last_uploaded_filename = None
+
 
 # HANDLE PDF UPLOAD
 if uploaded_file is not None:
@@ -42,9 +46,10 @@ if uploaded_file is not None:
     if st.session_state.uploaded_file_hash != current_file_hash:
         st.session_state.uploaded_file_hash = current_file_hash
         st.session_state.pdf_uploaded = False
+        st.session_state.last_uploaded_filename = uploaded_file.name
         
     # # This prevents multiple API calls due to Streamlit reruns
-    if not st.session_state.pdf_uploaded:
+    if st.button("Upload PDF"):
         files = {
             "file": (uploaded_file.name, file_bytes, "application/pdf")
         }
@@ -54,29 +59,33 @@ if uploaded_file is not None:
                 response = requests.post(f"{API_URL}/upload", files=files, timeout=120)
 
             if response.status_code == 200:
-                st.success("PDF uploaded successfully.")
                 st.session_state.pdf_uploaded = True
             else:
-                error_message = response.text
                 try:
                     error_message = response.json().get("detail", response.text)
                 except Exception:
-                    pass
+                    error_message = response.text
+
+                st.session_state.pdf_uploaded = False
                 st.error(f"Failed to upload PDF.\n\n{error_message}")
 
         except Exception as e:
+            st.session_state.pdf_uploaded = False
             st.error(f"Error while uploading PDF: {str(e)}")
 
-    else:
-        st.success("PDF uploaded successfully.")
+        
+    if st.session_state.pdf_uploaded:
+        st.success("PDF is ready. You can now ask questions.")
         
 # QUESTION INPUT        
 question = st.text_input("Ask a question about the PDF")
 
 #  ASK BUTTON LOGIC
 if st.button("Ask"):
-    if not st.session_state.pdf_uploaded:
-        st.warning("Please upload a PDF first.")
+    if uploaded_file is None:
+        st.warning("Please choose a PDF first.")
+    elif not st.session_state.pdf_uploaded:
+        st.warning("Please upload the PDF first.")
     elif not question.strip():
         st.warning("Please enter a question.")
     else:
