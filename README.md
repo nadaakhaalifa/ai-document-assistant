@@ -2,6 +2,8 @@
 ![App Demo](demo.png)
 An AI-powered application that allows users to upload PDF documents and ask questions about their content using embeddings and semantic search.
 
+# Demo Video
+[Watch the demo here] (https://drive.google.com/file/d/1sYAfGbXFqVpzimHwhcwwdu80DOBCAyQS/view?usp=drivesdk)
 # Live Demo
 Frontend:
 https://ai-document-assistant-1-lvec.onrender.com
