@@ -1,39 +1,53 @@
 # AI Document Assistant
 ![App Demo](demo.png)
-An AI-powered document assistant built with FastAPI and OpenAI that uses Retrieval-Augmented Generation (RAG) to answer questions from uploaded PDFs.
+An AI-powered application that allows users to upload PDF documents and ask questions about their content using embeddings and semantic search.
 
-# AI Document Assistant
-
-Try the app here:
+# Live Demo
+Frontend:
 https://ai-document-assistant-1-lvec.onrender.com
 
+Backend API: 
+https://fastapi-backend-ekgg.onrender.com
+
+## 📌 Overview
+
+AI Document Assistant is a full-stack application that leverages modern AI techniques to understand and answer questions about uploaded documents.
+
+It uses vector embeddings + FAISS similarity search to retrieve relevant information and generate accurate answers using an LLM.
+
 ## Features
-- Upload PDF documents
-- Intelligent chunking & embedding
-- Semantic search using cosine similarity
-- LLM-powered answer generation
-- Clean and simple API
+-  Upload PDF documents
+-  Intelligent semantic search
+-  Context-aware question answering
+-  Fast retrieval using FAISS
+-  Deployed full-stack application (frontend + backend)
 
 ## Architecture
-1. PDF → text extraction
-2. Text → chunks
-3. Chunks → embeddings
-4. Question → embedding
-5. Similarity search (top-k)
-6. LLM generates answer using context
+User 
+ → Streamlit (Frontend) 
+ → FastAPI (Backend)
+ → Text Processing + Chunking 
+ → OpenAI Embeddings 
+ → FAISS Vector Search 
+ → LLM Response
 
 ## Tech Stack
-- Python  
-- FastAPI (Backend API)  
-- Streamlit (Frontend UI)  
-- Sentence Transformers (Embeddings)  
-- OpenAI API (LLM)  
+- Frontend: Streamlit
+- Backend: FastAPI
+- Embeddings: OpenAI API
+- Vector DB: FAISS
+- Deployment: Render
+- Language : Python
 
-## Frontend
-A simple Streamlit interface is provided to interact with the backend.
-- Upload PDF files  
-- Ask questions  
-- View AI-generated answers  
+## How It Works
+1. User uploads a PDF document
+2. Text is extracted and split into chunks
+3. All chunks are converted into embeddings (batch processing)
+4. Embeddings are stored in a FAISS index
+5. User submits a question
+6. Question is embedded
+7. FAISS retrieves the most relevant chunks
+8. LLM generates a final answer based on context
 
 
 ## API Endpoints
@@ -54,13 +68,13 @@ source ai-venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Environment
+## Environment Variables
 Create a `.env` file:
 ```env
 OPENAI_API_KEY=your_api_key_here
 ```
 
-## Run server 
+## Run backend server 
 ```bash
 uvicorn main:app --reload
 ```
@@ -71,24 +85,22 @@ Open a new terminal and run:
 streamlit run streamlit_app.py
 ```
 
-
-## Open docs
-http://127.0.0.1:8000/docs
-
-## Example request
-
-```json
-{
-  "question": "What is this document about?"
-}
-```
-
 ## Notes
-This is a basic RAG implementation
-
-Data is stored in memory (not persistent yet)
-
-.env is not included for security reasons
-
-## Notes
+- Uses OpenAI API (requires API key)
+- Optimized to reduce API calls using batch embeddings
+- Designed to avoid rate limiting issues
 - First request may be slow due to Render free tier (cold start)
+
+## Future Improvements
+- Support multiple PDF uploads
+- Persistent FAISS storage
+- Chat history and memory
+- Authentication system
+- Improved UI/UX
+
+## Author
+Nada Khalifa
+Software Engineer | AI & Machine Learning Enthusiast
+
+## If you like this project
+Give it a star ⭐ on GitHub!
