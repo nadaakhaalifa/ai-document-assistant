@@ -7,6 +7,7 @@ from pydantic import BaseModel
 import os
 import numpy as np
 import faiss
+import time
 
 
 # Go read file .env now so the API become available to the code
@@ -29,7 +30,7 @@ def home():
     return {"message":"API is working"}
 
 # chunking function
-def split_text(text: str, chunk_size: int = 500, overlap: int = 100):
+def split_text(text: str, chunk_size: int = 1500, overlap: int = 200):
     chunks = []
     start = 0
 
@@ -52,19 +53,29 @@ def get_embedding(text: str):
 
 
 def build_faiss_index(chunks):
-    response = client.embeddings.create(
-        model="text-embedding-3-small",
-        input=chunks
-    )
-    embeddings = [get_embedding(chunk) for chunk in chunks]
-    embeddings = np.array(embeddings, dtype="float32")
+    max_retries = 3
 
-    faiss.normalize_L2(embeddings)
+    for attempt in range(max_retries):
+        try:
+            response = client.embeddings.create(
+                model="text-embedding-3-small",
+                input=chunks
+            )
 
-    dimension = embeddings.shape[1]
-    index = faiss.IndexFlatIP(dimension)
-    index.add(embeddings)
-    return index
+            embeddings = [item.embedding for item in response.data]
+            embeddings = np.array(embeddings, dtype="float32")
+
+            faiss.normalize_L2(embeddings)
+
+            dimension = embeddings.shape[1]
+            index = faiss.IndexFlatIP(dimension)
+            index.add(embeddings)
+            return index
+
+        except Exception as e:
+            if attempt == max_retries - 1:
+                raise e
+            time.sleep(2)
 
 
 # retrieval function
@@ -146,7 +157,7 @@ async def upload_file(file: UploadFile = File(...)):
         if not text.strip():
             raise HTTPException(status_code=400, detail="Could not extract text from PDF")
 
-        stored_chunks = split_text(text)
+        stored_chunks = split_text(text, chunk_size=1500, overlap=200)[:20]
         faiss_index = build_faiss_index(stored_chunks)
 
         return {
