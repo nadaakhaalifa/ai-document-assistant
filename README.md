@@ -6,10 +6,12 @@ An AI-powered application that allows users to upload PDF documents and ask ques
 [Watch the demo here] (https://drive.google.com/file/d/1sYAfGbXFqVpzimHwhcwwdu80DOBCAyQS/view?usp=drivesdk)
 # Live Demo
 Frontend:
-https://ai-document-assistant-1-lvec.onrender.com
+<!-- https://ai-document-assistant-1-lvec.onrender.com -->
+https://peaceful-analysis-production.up.railway.app
 
 Backend API: 
-https://fastapi-backend-ekgg.onrender.com
+<!-- https://fastapi-backend-ekgg.onrender.com -->
+https://ai-document-assistant-production.up.railway.app
 
 ## 📌 Overview
 
@@ -38,7 +40,7 @@ User
 - Backend: FastAPI
 - Embeddings: OpenAI API
 - Vector DB: FAISS
-- Deployment: Render
+- Deployment: Railway
 - Language : Python
 
 ## How It Works
@@ -91,7 +93,6 @@ streamlit run streamlit_app.py
 - Uses OpenAI API (requires API key)
 - Optimized to reduce API calls using batch embeddings
 - Designed to avoid rate limiting issues
-- First request may be slow due to Render free tier (cold start)
 
 ## Future Improvements
 - Support multiple PDF uploads

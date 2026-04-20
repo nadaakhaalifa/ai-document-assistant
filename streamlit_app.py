@@ -7,7 +7,7 @@ import hashlib
 st.set_page_config(page_title="AI Document Assistant", page_icon="📄", layout="centered")
 
 # Backend API URL (from env or fallback to deployed backend)
-API_URL = os.getenv("API_URL", "https://fastapi-backend-ekgg.onrender.com")
+API_URL = os.getenv("API_URL")
 
 # UI Title
 st.title("AI Document Assistant")
